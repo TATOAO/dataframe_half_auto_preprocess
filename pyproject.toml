@@ -1,0 +1,18 @@
+[project]
+name = "example_package_YOUR_USERNAME_HERE"
+version = "1.0.1"
+authors = [
+  { name="TATOAO", email="TATOAO@126.com" },
+]
+description = "A simple framework for Dataframe (Dask & Pandas dataframe) data processing tool"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/TATOAO/dataframe_half_auto_preprocess"
+Issues = "https://github.com/TATOAO/dataframe_half_auto_preprocess/issues"
