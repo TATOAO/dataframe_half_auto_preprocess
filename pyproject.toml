@@ -2,7 +2,9 @@
 requires = [
 	"hatchling>=1.21.0",
 	"setuptools>=61.0",
-	"plotext>=5.2.8"
+	"plotext>=5.2.8",
+	"pandas",
+	"dask"
 	]
 build-backend = "hatchling.build"
 

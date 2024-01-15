@@ -1,5 +1,6 @@
 from typing import Any, Optional, List
 from pandas import DataFrame
+from multiprocessing import Pool
 
 class DataProcessor:
     from_cols: List[Optional[str]] = []
@@ -15,7 +16,8 @@ class DataProcessor:
 
 
         if self.default_value:
-            df[self.col_name].fillna(self.default_value, inplace=True)
+            # dask is not allow "inplace"
+            df[self.col_name] = df[self.col_name].fillna(self.default_value)
         # if is_category:
         #     df[self.col_name] = df[self.col_name].astype(self.d_type)
         df[self.col_name] = df[self.col_name].astype(self.d_type)
@@ -26,6 +28,7 @@ class DataProcessor:
         mission value ratio
         distribution
         """
+        # with Pool() as pool:
         pass
 
     def run(self, df: DataFrame):
