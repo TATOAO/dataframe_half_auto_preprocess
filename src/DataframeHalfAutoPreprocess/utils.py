@@ -1,5 +1,5 @@
-from DataProcessor import DataProcessor 
-from DataProcessorRegister import DataProcessorRegister
+from .DataProcessor import DataProcessor 
+from .DataProcessorRegister import DataProcessorRegister
 register = DataProcessorRegister()
 
 

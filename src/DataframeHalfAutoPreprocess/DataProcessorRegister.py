@@ -1,6 +1,6 @@
 from typing import Dict, Optional
 from pandas import DataFrame
-from DataProcessor import DataProcessor
+from .DataProcessor import DataProcessor
 
 class DataProcessorRegister:
     registed = {}
@@ -9,7 +9,8 @@ class DataProcessorRegister:
     def set_dataframe(self, df: DataFrame):
         self.registed_df = df
 
-    def register(self, cls):
+    def __call__(self, cls):
+    # def register(self, cls):
         self.registed[cls.__name__] = cls()
 
     def execurate(self):

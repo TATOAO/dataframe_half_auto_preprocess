@@ -1,5 +1,4 @@
 from typing import Any, Optional, List
-from ascii_graph import Pyasciigraph
 from pandas import DataFrame
 
 class DataProcessor:
