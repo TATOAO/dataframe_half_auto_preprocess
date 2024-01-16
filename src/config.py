@@ -9,6 +9,3 @@ class col_A(dhap.DataProcessor):
     default_value = "missing"
     is_category = False
 
-    def statistic(self, df):
-        super().statistic(df)
-        pass
