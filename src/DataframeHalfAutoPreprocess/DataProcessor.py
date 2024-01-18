@@ -15,7 +15,7 @@ class DataProcessor:
     def process(self, df: DataFrame):
 
 
-        if self.default_value:
+        if self.default_value is not None:
             # dask is not allow "inplace"
             df[self.col_name] = df[self.col_name].fillna(self.default_value)
         # if is_category:
@@ -29,11 +29,20 @@ class DataProcessor:
         distribution
         """
         # with Pool() as pool:
+        # self.count_group
+        # df.map_partitions(self.count_group)
         pass
 
     def run(self, df: DataFrame):
         self.process(df)
         self.statistic(df)
+
+
+    def count_group(self, partition):
+        pass
+        # count_result = partition.groupby(self.col_name).count()
+        # accumulated_counts.append(count_result)
+        # print(count_result)
 
     def __init_subclass__(cls, **kwargs):
         """

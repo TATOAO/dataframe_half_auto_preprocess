@@ -22,7 +22,9 @@ class DataProcessorRegister:
     def execurate(self):
         for col_name, col_processor in self.registed.items():
             col_processor().run(self.registed_df)
-        pass
+        if self.registed_df is not None:
+            result = self.registed_df.compute()
+            return result
 
 
 
