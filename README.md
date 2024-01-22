@@ -1,5 +1,16 @@
 
-# A simple framework for Dataframe (Dask & Pandas dataframe) data processing tool (
+# A simple framework for Dataframe (Dask & Pandas dataframe) data processing tool 
+
+
+## input 
+
+1. raw data
+2. column process methods
+
+## ouput
+1. label encoder
+2. scaler 
+3. processed data
 
 
 ## Usage
@@ -13,6 +24,7 @@ class col_A(dhap.DataProcessor):
     d_type = "int"
     default_value = -1
     is_category = False
+    sample_nrow = 100
 
 
 # main.py
@@ -25,7 +37,11 @@ dhap.register.set_dataframe(df)
 dhap.register.execurate()
 
 
-
-
 ```
+
+## TODO
+
+1. sample and visulualize statistic of columns
+2. data preprocessing with sklearn processing
+3. 
 

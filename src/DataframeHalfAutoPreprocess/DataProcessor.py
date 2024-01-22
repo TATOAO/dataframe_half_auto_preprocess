@@ -1,6 +1,7 @@
 from typing import Any, Optional, List
 from pandas import DataFrame
 from multiprocessing import Pool
+from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 
 class DataProcessor:
     from_cols: List[Optional[str]] = []
@@ -12,8 +13,7 @@ class DataProcessor:
     def __call__(self, *args: Any, **kwds: Any) -> Any:
         return self
 
-    def process(self, df: DataFrame):
-
+    def process(self, df: DataFrame) -> None:
 
         if self.default_value is not None:
             # dask is not allow "inplace"
@@ -22,6 +22,14 @@ class DataProcessor:
         #     df[self.col_name] = df[self.col_name].astype(self.d_type)
         df[self.col_name] = df[self.col_name].astype(self.d_type)
 
+    def transform(self, df: DataFrame, sample: DataFrame) -> None:
+        if self.d_type == "str":
+            le = LabelEncoder()
+            le.fit(df[self.col_name])
+
+    def preprocessing_with_sample(self, sample_df: DataFrame):
+        if self.is_category or self.d_type == "str":
+            pass
 
     def statistic(self, df: DataFrame):
         """
@@ -33,9 +41,10 @@ class DataProcessor:
         # df.map_partitions(self.count_group)
         pass
 
-    def run(self, df: DataFrame):
+    def run(self, df: DataFrame, sample_df: Optional[DataFrame] = None):
         self.process(df)
         self.statistic(df)
+        self.transform(df, sample_df)
 
 
     def count_group(self, partition):
