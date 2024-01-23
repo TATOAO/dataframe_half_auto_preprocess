@@ -1,21 +1,4 @@
 
-# A simple framework for Dataframe (Dask & Pandas dataframe) data processing tool 
-
-
-## input 
-
-1. raw data
-2. column process methods
-
-## ouput
-1. label encoder
-2. scaler 
-3. processed data
-
-
-## Usage
-
-```py
 # config.py
 import json
 import DataframeHalfAutoPreprocess as dhap
@@ -76,7 +59,7 @@ with open('...', 'r') as transformer_json:
         "col_name": "B",
         "transformer": {
             "min_max_scaler": {
-                "encoder_id": "col_B_min_max_scaler"
+                "encoder_id: "col_B_min_max_scaler"
             }
         },
         "statistic":{
@@ -111,22 +94,15 @@ with open('...', 'r') as transformer_json:
 # transformers (details)
 {
     "col_A_label_encoder":{
+        "col_name": "A",
         "classes": ["大众", "宝马", ... ]
     }
 },
 {
     "col_B_min_max_scaler":{
+        "col_name": "B",
         "min": 2390.9,    
         "max": 39239.09,    
         "scaller": 2323
     }
 }
-
-```
-
-## TODO
-
-1. sample and visulualize statistic of columns
-2. data preprocessing with sklearn processing
-3. 
-

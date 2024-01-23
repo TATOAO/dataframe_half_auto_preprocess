@@ -22,10 +22,15 @@ class DataProcessor:
         #     df[self.col_name] = df[self.col_name].astype(self.d_type)
         df[self.col_name] = df[self.col_name].astype(self.d_type)
 
-    def transform(self, df: DataFrame, sample: DataFrame) -> None:
+    def get_transformer(self, df: DataFrame, sample: DataFrame) -> None:
         if self.d_type == "str":
             le = LabelEncoder()
             le.fit(df[self.col_name])
+
+    def load_transormer(self, source_dict: dict):
+        """
+        """
+
 
     def preprocessing_with_sample(self, sample_df: DataFrame):
         if self.is_category or self.d_type == "str":

@@ -8,4 +8,3 @@ class col_A(DataProcessor):
     d_type = "int"
     default_value = -1
     is_category = False
-

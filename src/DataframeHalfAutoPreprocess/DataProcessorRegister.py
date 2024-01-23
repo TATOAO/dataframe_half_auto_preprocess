@@ -58,6 +58,9 @@ class DataProcessorRegister:
             result = self.registed_df.compute()
             return result
 
+    def load_transformer(self, file_name:str):
+        pass
+
 
 
 

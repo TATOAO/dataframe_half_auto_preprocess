@@ -11,3 +11,19 @@ for i in range(10):
         plt.clear_terminal()
 
 
+# import time
+#
+# def print_progress_bar(iteration, total, prefix='', suffix='', length=30, fill='█', print_end='\r'):
+#     percent = ("{0:.1f}").format(100 * (iteration / float(total)))
+#     filled_length = int(length * iteration // total)
+#     bar = fill * filled_length + '-' * (length - filled_length)
+#     print(f'\r{prefix} |{bar}| {percent}% {suffix}', end=print_end, flush=True)
+#
+# # Example usage
+# total_iterations = 100
+# for i in range(1, total_iterations + 1):
+#     time.sleep(0.1)  # Simulating some task that takes time
+#     print_progress_bar(i, total_iterations, prefix='Progress:', suffix='Complete', length=50)
+#
+# print("\nTask completed!")
+#
