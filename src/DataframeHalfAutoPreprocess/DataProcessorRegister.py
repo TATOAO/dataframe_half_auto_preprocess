@@ -1,6 +1,7 @@
 from typing import Dict, Optional, List
 from pandas import DataFrame
 from .DataProcessor import DataProcessor
+from .helper import MyEncoder
 
 class DataProcessorRegister:
     registed: Dict[str, DataProcessor] = {}
@@ -11,6 +12,8 @@ class DataProcessorRegister:
     sample_ratio: float = 0.01
     sample_df:Optional[DataFrame] = None
     random_seed: int = 28938
+
+    transformer_dict: dict = {}
 
     def set_dataframe(self, df: DataFrame) -> None:
         self.registed_df = df
@@ -52,6 +55,10 @@ class DataProcessorRegister:
         return result
 
     def execurate(self):
+        """
+        using the sample df of each column, doing some statistics and create a
+        corresbonding transormfer 
+        """
         for col_name, col_processor in self.registed.items():
             col_processor().run(self.registed_df)
         if self.registed_df is not None:

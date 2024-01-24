@@ -49,7 +49,17 @@ class DataProcessor:
     def run(self, df: DataFrame, sample_df: Optional[DataFrame] = None):
         self.process(df)
         self.statistic(df)
-        self.transform(df, sample_df)
+        self.fit_transform(sample_df)
+
+    def fit_transform(self, sample_df):
+        if is_category:
+            lbe = LabelEncoder()
+            lbe.fit(sample_df)
+            return lbe
+        else:
+            min_max_scaler = MinMaxScaler
+            min_max_scaler.fit(sample_df)
+            return min_max_scaler
 
 
     def count_group(self, partition):
