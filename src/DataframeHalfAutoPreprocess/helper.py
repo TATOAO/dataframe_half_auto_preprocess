@@ -1,16 +1,50 @@
 from json import JSONEncoder
-from sklearn.preprocessing import LabelEncoder, MinMaxScaler
+from sklearn.preprocessing import LabelEncoder, MinMaxScaler, OrdinalEncoder
 import numpy as np
 from typing import Self, Optional
+import json
 import pandas as pd
+# from json.encoder import (_make_iterencode, JSONEncoder,
+#                         encode_basestring_ascii, FLOAT_REPR, INFINITY,
+#                         c_make_encoder, encode_basestring)
+
 
 class MyEncoder(JSONEncoder):
+
     def default(self, o):
         if hasattr(o, "__to_json__"):
             return o.__to_json__()
         else:
-            return {"missing": o.__name__}
+            return None
         
+class OrdinalEncoderJson(OrdinalEncoder):
+    encdoer_id:str = "unset"
+    def __init__(self, encoder_id: Optional[str]=None, **kargs):
+        super().__init__(handle_unknown='use_encoded_value', unknown_value = np.nan, **kargs)
+        if encoder_id == None:
+            error_message = f"{self.__class__.__name__} must contains 'encoder_id' attribute"
+            raise Exception(error_message)
+        self.encoder_id = encoder_id
+
+    def __to_json__(self) -> dict:
+        return {
+                    "encoder_id": self.encoder_id,
+                    "encoder_type": "OrdinalEncoder",
+                    "classes": self.categories_[0].tolist()
+                }
+
+    @classmethod
+    def load_from_dict(cls, input_dict: dict) -> Self:
+
+        if input_dict['encoder_type'] != "OrdinalEncoder":
+            error_message = (f"Encoder Type {input_dict['encoder_type']}(input)",
+                             f"Not Match {cls.__name__}")
+            raise(Exception(error_message))
+
+        new_obj = cls(encoder_id = input_dict['encoder_id'])
+        new_obj.fit(np.array(input_dict['classes']).reshape(-1,1))
+        return new_obj
+
 class LabelEncoderJson(LabelEncoder):
     encdoer_id:str = "unset"
     def __init__(self, encoder_id: Optional[str]=None):
@@ -29,6 +63,19 @@ class LabelEncoderJson(LabelEncoder):
 
     @classmethod
     def load_from_dict(cls, input_dict: dict) -> Self:
+        """
+        example dict:
+            {
+                "encoder_id": "AAA_encoder",
+                "encoder_type": "MinMaxScaler",
+                "scale": [12,24,4,34],
+                "min": [11,2,4,5],
+                "data_min": self.data_min_.tolist(),
+                "data_max": self.data_max_.tolist(),
+                "data_range": self.data_range_.tolist()
+            }
+
+        """
 
         if input_dict['encoder_type'] != "LabelEncoder":
             error_message = (f"Encoder Type {input_dict['encoder_type']}(input)",
@@ -90,30 +137,78 @@ class MinMaxScalerJson(MinMaxScaler):
         return new_obj
 
 def main():
-    example_min_max_saler()
+    # example_min_max_saler()
     example_label_encoder()
+    # example_ordinal_encoder()
 
 def example_label_encoder():
     a = LabelEncoderJson(encoder_id = "wefwef")
     sample_df = pd.DataFrame(np.random.choice(list("abcd"), size=(100,4)), columns=list('ABCD'))
     a.fit(sample_df.head(50)['A'])
-    a_dict = a.__to_json__()
+    # a_dict = a.__to_json__()
 
-    b = LabelEncoderJson.load_from_dict(a_dict)
-    sample_df = pd.DataFrame(np.random.choice(list("abcde"), size=(100,4)), columns=list('ABCD'))
+    file = open('a.json', 'w')
+    j_s = json.dump(a, fp = file, cls=MyEncoder)
+    file.close()
+
+
+    file = open('a.json', 'r')
+    the_dict = json.load(fp = file)
+    file.close()
+
+    b = LabelEncoderJson.load_from_dict(the_dict)
     x = sample_df.tail(50)['A']
-    print(x[:4] + ['X'])
+    print(x[:5])
     x1 = b.transform(x)
     print(x1[:5])
+    pass
+
+def example_ordinal_encoder():
+    a = OrdinalEncoderJson(encoder_id = "wefwef")
+    np.random.seed(10)
+    sample_df = pd.DataFrame(np.random.choice(list("abcd"), size=(100,4)), columns=list('ABCD'))
+
+    a.fit(sample_df.head(50)['A'].values.reshape(-1,1))
+
+    # a_dict = a.__to_json__()
+    file = open('a.json', 'w')
+    j_s = json.dump(a, fp = file, cls=MyEncoder)
+    file.close()
+
+
+    file = open('a.json', 'r')
+    the_dict = json.load(fp = file)
+    file.close()
+    b = OrdinalEncoderJson.load_from_dict(the_dict)
+    
+    file.close()
+
+
+
+    sample_df = pd.DataFrame(np.random.choice(list("cdef"), size=(100,4)), columns=list('ABCD'))
+    x = sample_df.tail(50)['A'].values.reshape(-1,1)
+    print(x[:10])
+    x1 = b.transform(x)
+    print(x1[:10])
     pass
 
 def example_min_max_saler():
     a = MinMaxScalerJson(encoder_id = "wefwef")
     sample_df = pd.DataFrame(np.random.randint(0,100,size=(100, 4)), columns=list('ABCD'))
     a.fit(sample_df.head(50)['A'].values.reshape(-1,1))
-    a_dict = a.__to_json__()
+    # a_dict = a.__to_json__()
 
-    b = MinMaxScalerJson.load_from_dict(a_dict)
+    file = open('a.json', 'w')
+    j_s = json.dump(a, fp = file, cls=MyEncoder)
+    file.close()
+
+
+    file = open('a.json', 'r')
+    the_dict = json.load(fp = file)
+    file.close()
+
+
+    b = MinMaxScalerJson.load_from_dict(the_dict)
     x = sample_df.tail(50)['A'].values.reshape(-1,1)
     print(x[:5])
     x1 = b.transform(x)
