@@ -36,6 +36,8 @@ from config import *
 
 df = pd.read_csv("sample.csv")
 dhap.register.set_dataframe(df)
+dhap.register.set_pre_encoder_load_file('./pre_encoder.json') # default ./pre_encoder.json
+dhap.register.set_statistic_save_file('./static.json') # defaultr 
 
 # take the sample dataframe and output statistic and transformer
 dhap.register.execurate() # generate statistic.json & transformer.json

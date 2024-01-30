@@ -5,7 +5,8 @@ requires = [
 	"plotext>=5.2.8",
 	"pandas",
 	"scikit-learn",
-	"dask"
+	"dask",
+	"dask-ml"
 	]
 build-backend = "hatchling.build"
 

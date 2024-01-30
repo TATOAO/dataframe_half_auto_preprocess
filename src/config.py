@@ -16,3 +16,10 @@ class col_E(dhap.DataProcessor):
     default_value = "missing"
     is_category = False
 
+@dhap.register
+class col_B(dhap.DataProcessor):
+    col_name = "B"
+    d_type = "int"
+    default_value = -1
+    is_category = False
+

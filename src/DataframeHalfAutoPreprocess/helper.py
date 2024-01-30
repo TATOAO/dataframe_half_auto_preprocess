@@ -1,5 +1,6 @@
 from json import JSONEncoder
-from sklearn.preprocessing import LabelEncoder, MinMaxScaler, OrdinalEncoder
+from sklearn.preprocessing import LabelEncoder, OrdinalEncoder
+from dask_ml.preprocessing import MinMaxScaler
 import numpy as np
 from typing import Self, Optional
 import json

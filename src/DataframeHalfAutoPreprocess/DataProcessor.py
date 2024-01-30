@@ -1,9 +1,13 @@
-from typing import Any, Optional, List
+from typing import Any, Optional, List, Union
 from pandas import DataFrame
 from multiprocessing import Pool
-from sklearn.preprocessing import LabelEncoder, MinMaxScaler
+import json
+from .helper import OrdinalEncoderJson, MinMaxScalerJson, MyEncoder
+
 
 class DataProcessor:
+    """
+    """
     from_cols: List[Optional[str]] = []
     col_name: str = ""
     d_type: str = ""
@@ -13,23 +17,20 @@ class DataProcessor:
     def __call__(self, *args: Any, **kwds: Any) -> Any:
         return self
 
-    def process(self, df: DataFrame) -> None:
-
+    def preprocess(self, df: DataFrame) -> None:
+        """
+        1. fill na data
+        2. convert data type
+        """
         if self.default_value is not None:
             # dask is not allow "inplace"
             df[self.col_name] = df[self.col_name].fillna(self.default_value)
-        # if is_category:
-        #     df[self.col_name] = df[self.col_name].astype(self.d_type)
         df[self.col_name] = df[self.col_name].astype(self.d_type)
-
-    def get_transformer(self, df: DataFrame, sample: DataFrame) -> None:
-        if self.d_type == "str":
-            le = LabelEncoder()
-            le.fit(df[self.col_name])
-
+            
     def load_transormer(self, source_dict: dict):
         """
         """
+        pass
 
 
     def preprocessing_with_sample(self, sample_df: DataFrame):
@@ -46,19 +47,28 @@ class DataProcessor:
         # df.map_partitions(self.count_group)
         pass
 
-    def run(self, df: DataFrame, sample_df: Optional[DataFrame] = None):
-        self.process(df)
-        self.statistic(df)
+    def run(self, df: Optional[DataFrame], 
+            sample_df: Optional[DataFrame] = None,
+            to_save_list: List = []):
+        """
+        self.preprocess(df)
+        self.statistic(sample_df)
         self.fit_transform(sample_df)
+        """
+
+        self.preprocess(df)
+        self.statistic(df)
+        to_save_list.append(self.fit_transform(sample_df))
 
     def fit_transform(self, sample_df):
-        if is_category:
-            lbe = LabelEncoder()
-            lbe.fit(sample_df)
+
+        if self.is_category or self.d_type == "str" or self.d_type == 'object':
+            lbe = OrdinalEncoderJson(encoder_id = self.col_name)
+            lbe.fit(sample_df[[self.col_name]])
             return lbe
         else:
-            min_max_scaler = MinMaxScaler
-            min_max_scaler.fit(sample_df)
+            min_max_scaler = MinMaxScalerJson(encoder_id = self.col_name)
+            min_max_scaler.fit(sample_df[[self.col_name]])
             return min_max_scaler
 
 

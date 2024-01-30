@@ -2,6 +2,7 @@ from typing import Dict, Optional, List
 from pandas import DataFrame
 from .DataProcessor import DataProcessor
 from .helper import MyEncoder
+import json
 
 class DataProcessorRegister:
     registed: Dict[str, DataProcessor] = {}
@@ -12,8 +13,11 @@ class DataProcessorRegister:
     sample_ratio: float = 0.01
     sample_df:Optional[DataFrame] = None
     random_seed: int = 28938
-
+    file_name: str = './pre_encoder.json'
     transformer_dict: dict = {}
+
+    def __init__(self):
+        pass
 
     def set_dataframe(self, df: DataFrame) -> None:
         self.registed_df = df
@@ -32,6 +36,9 @@ class DataProcessorRegister:
 
         if sample_ratio is not None:
             self.sample_nrows = sample_ratio
+            
+    def set_pre_encoder_load_file(self, file_name:str = './pre_encoder.json') -> None:
+        self.loaded_json_path = file_name
 
     def get_sample_df(self, use_cache:bool = False) -> Optional[DataFrame]:
         if use_cache:
@@ -41,8 +48,14 @@ class DataProcessorRegister:
             return None
 
         if self.sample_ratio is not None:
-            sample_df = self.registed_df.sample(frac=self.sample_ratio, 
-                                                random_state=self.random_seed)
+            sample_df = None
+            while sample_df is None or len(sample_df) <= 10:
+                print(self.sample_df)
+                sample_df = self.registed_df.sample(frac=self.sample_ratio, 
+                                                    random_state=self.random_seed)
+                if len(sample_df) <= 10:
+                    self.sample_ratio += 0.01
+
             return sample_df
 
     def __call__(self, cls: type[DataProcessor]):
@@ -59,11 +72,33 @@ class DataProcessorRegister:
         using the sample df of each column, doing some statistics and create a
         corresbonding transormfer 
         """
+
+        if self.sample_df is None:
+            self.set_sample_dataframe()
+
+        to_save_path = open(self.loaded_json_path, 'w')
+        to_save_list = []
+        import ipdb;ipdb.set_trace()
         for col_name, col_processor in self.registed.items():
-            col_processor().run(self.registed_df)
+            processor: DataProcessor = col_processor()
+            processor.run(self.registed_df, self.sample_df, to_save_list = to_save_list)
+            if self.sample_df is None:
+                raise ValueError("self.sample_df is None")
+
+        json.dump(to_save_list, fp=to_save_path, cls= MyEncoder, indent=4)
+        to_save_path.close()
+
+
         if self.registed_df is not None:
             result = self.registed_df.compute()
             return result
+
+    def load_transformer_from_list(self, config_list:list[dict]):
+        for config_dict in config_list:
+            if 'encoder_type' in config_dict:
+                pass
+            pass
+        pass
 
     def load_transformer(self, file_name:str):
         pass
