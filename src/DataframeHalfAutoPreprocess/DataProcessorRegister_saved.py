@@ -6,29 +6,9 @@ import json
 
 class DataProcessorRegister:
     """
-    Pipline:
-        1. regist all column processor
-
-        if [prepare]
-        2. processing based on processor
-            i) run i.e  preprocssing, statisics
-                a) preprocessing includes:
-                    1. fill null value
-                    2. convert categorical values
-            ii) generate a sample data 
-            iii) fit a encoder
-            iiii) save a json file that help predit with same config
-        
-        if [predict]
-        2. processing based on processor
-            i) load a json file
-            ii) predict i.e  preprocssing
-            
     """
-
-
     # saved class to process a column
-    registed_processor_dict: Dict[str, DataProcessor] = {}
+    registed: Dict[str, DataProcessor] = {}
     registed_df:Optional[DataFrame] = None
     scalers_json: str = ""
     labelencoders_json: str = ""
@@ -40,9 +20,8 @@ class DataProcessorRegister:
     transformer_dict: dict[str, Union[MinMaxScalerJson, OrdinalEncoderJson]] = {}
 
 
-    def get_all_categorical_columns_name(self) -> list[str]:
-        return [processor.col_name 
-                for processor in self.registed_processor_dict.values()]
+    def __init__(self):
+        pass
 
     def set_dataframe(self, df: DataFrame) -> None:
         self.registed_df = df
@@ -90,11 +69,11 @@ class DataProcessorRegister:
             return sample_df
 
     def __call__(self, cls: type[DataProcessor]):
-        self.registed_processor_dict[cls.__name__] = cls()
+        self.registed[cls.__name__] = cls()
 
     def get_column_names(self) -> List[str]:
         result: List[str] = []
-        for col_processor in self.registed_processor_dict.values():
+        for col_processor in self.registed.values():
             result.append(col_processor.col_name)
         return result
 
@@ -109,7 +88,7 @@ class DataProcessorRegister:
 
         to_save_path = open(self.loaded_json_path, 'w')
         to_save_list = []
-        for col_name, col_processor in self.registed_processor_dict.items():
+        for col_name, col_processor in self.registed.items():
             processor: DataProcessor = col_processor()
             processor.run(self.registed_df, self.sample_df, to_save_list = to_save_list)
             if self.sample_df is None:
@@ -126,6 +105,7 @@ class DataProcessorRegister:
         for col_name, transformer in self.transformer_dict.items():
             import ipdb;ipdb.set_trace()
             self.registed_df[col_name] = transformer.transform(self.registed_df[[col_name]])
+        
 
     def load_transformer_from_file(self, load_path:str = ""):
         file = open(load_path, 'r')

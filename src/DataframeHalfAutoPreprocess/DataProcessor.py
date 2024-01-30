@@ -7,6 +7,18 @@ from .helper import OrdinalEncoderJson, MinMaxScalerJson, MyEncoder
 
 class DataProcessor:
     """
+    in preparing
+
+    1. fill na
+    2. convert data
+        i.e. turn to categorical data,
+
+    in predicting
+
+    1. fill na
+    2. accept config from json file
+
+
     """
     from_cols: List[Optional[str]] = []
     col_name: str = ""
@@ -16,6 +28,16 @@ class DataProcessor:
 
     def __call__(self, *args: Any, **kwds: Any) -> Any:
         return self
+
+    def __init_subclass__(cls, **kwargs):
+        """
+        Ensure the subclas must contains non emptry string
+        """
+        for required in ('col_name', 'd_type'):
+            if getattr(cls, required) == "":
+                raise TypeError(f"Can't instantiate abstract class {cls.__name__} without {required} attribute defined")
+        
+        return super().__init_subclass__(**kwargs)
 
     def preprocess(self, df: DataFrame) -> None:
         """
@@ -27,11 +49,6 @@ class DataProcessor:
             df[self.col_name] = df[self.col_name].fillna(self.default_value)
         df[self.col_name] = df[self.col_name].astype(self.d_type)
             
-    def load_transormer(self, source_dict: dict):
-        """
-        """
-        pass
-
 
     def preprocessing_with_sample(self, sample_df: DataFrame):
         if self.is_category or self.d_type == "str":
@@ -71,20 +88,11 @@ class DataProcessor:
             min_max_scaler.fit(sample_df[[self.col_name]])
             return min_max_scaler
 
+    ##################### below is for statisics ##################
 
     def count_group(self, partition):
         pass
         # count_result = partition.groupby(self.col_name).count()
         # accumulated_counts.append(count_result)
         # print(count_result)
-
-    def __init_subclass__(cls, **kwargs):
-        """
-        Ensure the subclas must contains non emptry string
-        """
-        for required in ('col_name', 'd_type'):
-            if getattr(cls, required) == "":
-                raise TypeError(f"Can't instantiate abstract class {cls.__name__} without {required} attribute defined")
-        
-        return super().__init_subclass__(**kwargs)
 
