@@ -17,9 +17,10 @@ def count_group(partition):
 
 # df.map_partitions(count_group)
 dhap.register.set_dataframe(df)
-dhap.register.set_pre_encoder_load_file('./pre_encoder.json')
-dhap.register.execurate()
-
+# dhap.register.set_pre_encoder_load_file('./pre_encoder.json')
+# dhap.register.execurate()
+dhap.register.load_transformer_from_file('./pre_encoder.json')
+dhap.register.unseen_preprocess()
 
 # dhap.register.set_dataframe(df, sample_size = 1e5)
 # with open('...', 'r') as transformer_json:
