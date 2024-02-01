@@ -8,19 +8,17 @@ from config import *
 sample_csv = '../sample_1k.csv'
 df = dd.read_csv(sample_csv, blocksize=1e2)
 
-def count_group(partition):
-    import ipdb;ipdb.set_trace()
-    count_result = partition.groupby('E').count()
-    # accumulated_counts.append(count_result)
-    print(count_result)
-
 
 # df.map_partitions(count_group)
 dhap.register.set_dataframe(df)
 # dhap.register.set_pre_encoder_load_file('./pre_encoder.json')
-# dhap.register.execurate()
-dhap.register.load_transformer_from_file('./pre_encoder.json')
-dhap.register.unseen_preprocess()
+dhap.register.prepare_compute()
+dhap.register.sample_compute()
+
+dhap.register.save_model()
+
+# dhap.register.load_transformer_from_file('./pre_encoder.json')
+# dhap.register.unseen_preprocess()
 
 # dhap.register.set_dataframe(df, sample_size = 1e5)
 # with open('...', 'r') as transformer_json:

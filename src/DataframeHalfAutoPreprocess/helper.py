@@ -16,19 +16,19 @@ class MyEncoder(JSONEncoder):
             return None
         
 class OrdinalEncoderJson(OrdinalEncoder):
-    encdoer_id:str = "unset"
+    column_name:str = "unset"
     def __init__(self, encoder_id: Optional[str]=None, **kargs):
-        super().__init__(handle_unknown='use_encoded_value', unknown_value = np.nan, **kargs)
+        super().__init__(**kargs)
         if encoder_id == None:
             error_message = f"{self.__class__.__name__} must contains 'encoder_id' attribute"
             raise Exception(error_message)
-        self.encoder_id = encoder_id
+        self.column_name = encoder_id
 
     def __to_json__(self) -> dict:
         return {
-                    "encoder_id": self.encoder_id,
+                    "encoder_id": self.column_name,
                     "encoder_type": "OrdinalEncoder",
-                    "classes": self.categories_[0].tolist()
+                    "classes": self.dtypes_[self.column_name].categories.tolist()
                 }
 
     @classmethod

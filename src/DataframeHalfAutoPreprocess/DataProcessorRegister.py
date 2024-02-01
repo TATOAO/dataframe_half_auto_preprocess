@@ -2,6 +2,7 @@ from typing import Dict, Optional, List, Union
 from pandas import DataFrame
 from .DataProcessor import DataProcessor
 from .helper import MyEncoder, MinMaxScalerJson, OrdinalEncoderJson
+from .json_helper import JsonSaverHelper
 import json
 
 class DataProcessorRegister:
@@ -38,12 +39,57 @@ class DataProcessorRegister:
     random_seed: int = 28938
     file_name: str = './pre_encoder.json'
     transformer_dict: dict[str, Union[MinMaxScalerJson, OrdinalEncoderJson]] = {}
-
+    json_helper: JsonSaverHelper = JsonSaverHelper()
 
     def get_all_categorical_columns_name(self) -> list[str]:
         return [processor.col_name 
                 for processor in self.registed_processor_dict.values()]
 
+    ################### main functions ############################## 
+
+    def __call__(self, processor: type[DataProcessor]):
+        """
+        register the config class
+        """
+        self.registed_processor_dict[processor.__name__] = processor()
+
+    def prepare_compute(self):
+        """
+        using the sample df of each column, doing some statistics and create a
+        corresbonding transormfer 
+
+        save it into pre_encoder.json
+        """
+
+        if self.sample_df is None:
+            self.set_sample_dataframe()
+
+        for col_name, col_processor in self.registed_processor_dict.items():
+            if self.sample_df is None:
+                raise ValueError("self.sample_df is None")
+            col_processor.run_with_statics(self.sample_df)
+            col_processor.fit_transform(self.sample_df)
+
+
+    def save_model(self):
+        """
+        must be run after "sample_compute"
+        """
+        for col_name, col_processor in self.registed_processor_dict.items():
+            self.json_helper.add_model(col_name, col_processor.get_encoder())
+            self.json_helper.write_to_json(self.file_name)
+
+    def compute(self):
+        result = self.registed_df.compute()
+        return result
+
+    def sample_compute(self):
+        if self.sample_df is None:
+            raise ValueError("self.sample_df is None")
+        return self.sample_df.compute()
+
+
+    #########  util functions #############
     def set_dataframe(self, df: DataFrame) -> None:
         self.registed_df = df
 
@@ -89,8 +135,6 @@ class DataProcessorRegister:
 
             return sample_df
 
-    def __call__(self, cls: type[DataProcessor]):
-        self.registed_processor_dict[cls.__name__] = cls()
 
     def get_column_names(self) -> List[str]:
         result: List[str] = []
@@ -98,59 +142,10 @@ class DataProcessorRegister:
             result.append(col_processor.col_name)
         return result
 
-    def execurate(self):
-        """
-        using the sample df of each column, doing some statistics and create a
-        corresbonding transormfer 
-        """
-
-        if self.sample_df is None:
-            self.set_sample_dataframe()
-
-        to_save_path = open(self.loaded_json_path, 'w')
-        to_save_list = []
-        for col_name, col_processor in self.registed_processor_dict.items():
-            processor: DataProcessor = col_processor()
-            processor.run(self.registed_df, self.sample_df, to_save_list = to_save_list)
-            if self.sample_df is None:
-                raise ValueError("self.sample_df is None")
-
-        json.dump(to_save_list, fp=to_save_path, cls= MyEncoder, indent=4)
-        to_save_path.close()
-
-        if self.registed_df is not None:
-            result = self.registed_df.compute()
-            return result
-
     def unseen_preprocess(self):
         for col_name, transformer in self.transformer_dict.items():
-            import ipdb;ipdb.set_trace()
             self.registed_df[col_name] = transformer.transform(self.registed_df[[col_name]])
 
-    def load_transformer_from_file(self, load_path:str = ""):
-        file = open(load_path, 'r')
-        config_list = json.load(file)
-        file.close()
-        self.load_transformer_from_list(config_list)
-
-    def load_transformer_from_list(self, config_list:list[dict]) -> None:
-
-        for config_dict in config_list:
-            if 'encoder_type' not in config_dict:
-                raise Exception("The source json file has no encoder_type")
-            
-            col_name = config_dict['encoder_id']
-            if config_dict['encoder_type'] == "MinMaxScaler":
-                self.transformer_dict[col_name] = MinMaxScalerJson.\
-                                        load_from_dict(config_dict)
-            elif config_dict['encoder_type'] == "OrdinalEncoder":
-                self.transformer_dict[col_name] = OrdinalEncoderJson.\
-                                        load_from_dict(config_dict)
-            else:
-                raise Exception("Now only support MinMaxScaler and OrdinalEncoder")
-
-
-            
 
 
 
