@@ -53,7 +53,7 @@ class DataProcessor:
         if self.default_value is not None:
             # dask is not allow "inplace"
             df[self.col_name] = df[self.col_name].fillna(self.default_value)
-        df[self.col_name] = df[self.col_name].astype(self.d_type)
+        # df[self.col_name] = df[self.col_name].astype(self.d_type)
 
         if self.judge_is_category():
             self.categorical_preprocess(df, categories)
@@ -81,7 +81,7 @@ class DataProcessor:
         """
         if self.judge_is_category():
 
-            counting_result = sample_df.groupby(self.col_name).count()
+            counting_result = sample_df.groupby(self.col_name).count().compute()
             print(counting_result)
 
 

@@ -68,6 +68,10 @@ class DataProcessorRegister:
             if self.sample_df is None:
                 raise ValueError("self.sample_df is None")
             col_processor.run_with_statics(self.sample_df)
+            # to fit category, the sample df must first be computed 
+
+        self.sample_df.compute()
+        for col_name, col_processor in self.registed_processor_dict.items():
             col_processor.fit_transform(self.sample_df)
 
 
@@ -127,11 +131,11 @@ class DataProcessorRegister:
         if self.sample_ratio is not None:
             sample_df = None
             while sample_df is None or len(sample_df) <= 10:
-                print(self.sample_df)
                 sample_df = self.registed_df.sample(frac=self.sample_ratio, 
                                                     random_state=self.random_seed)
                 if len(sample_df) <= 10:
                     self.sample_ratio += 0.01
+            use_cache = True
 
             return sample_df
 
