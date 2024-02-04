@@ -1,9 +1,8 @@
 from typing import Any, Optional, List, Union
 from pandas import DataFrame
 import pandas as pd
-from multiprocessing import Pool
-import json
 from .helper import OrdinalEncoderJson, MinMaxScalerJson, MyEncoder
+from .json_helper import JsonSaverHelper
 
 
 class DataProcessor:
@@ -30,6 +29,12 @@ class DataProcessor:
     default_value: Optional[Any] = None
     is_category: bool = True
     encoder: Any = None
+    json_helper: JsonSaverHelper
+    file_name: str
+
+    def __init__(self, json_helper: JsonSaverHelper, file_name: str):
+        self.json_helper = json_helper
+        self.file_name = file_name
 
     def __call__(self, *args: Any, **kwds: Any) -> Any:
         return self
@@ -53,11 +58,21 @@ class DataProcessor:
         if self.default_value is not None:
             # dask is not allow "inplace"
             df[self.col_name] = df[self.col_name].fillna(self.default_value)
-        # df[self.col_name] = df[self.col_name].astype(self.d_type)
+        df[self.col_name] = df[self.col_name].astype(self.d_type)
 
         if self.judge_is_category():
             self.categorical_preprocess(df, categories)
 
+
+    def init_transform(self):
+        """
+        must run after set the json file
+        """
+        pass
+
+    def prepare_run_transform(self, df: DataFrame) -> None:
+        encoder = self.get_encoder()
+        df[self.col_name] = encoder.transform(df[[self.col_name]])[self.col_name]
 
     def fit_transform(self, sample_df: DataFrame) -> \
                 Union[OrdinalEncoderJson, MinMaxScalerJson]:
@@ -85,12 +100,6 @@ class DataProcessor:
             print(counting_result)
 
 
-    def after_run(self, df, categories):
-        """
-        no 
-        """
-        self.preprocess(df, categories)
-
     def run(self, df:DataFrame) -> None:
         self.preprocess(df)
 
@@ -109,7 +118,14 @@ class DataProcessor:
         self.statistic(sample_df)
 
     def get_encoder(self) -> Union[OrdinalEncoderJson, MinMaxScalerJson]:
-        return self.encoder
+        if self.encoder is not None:
+            return self.encoder
+        else:
+            # try to load from json file
+            if self.file_name is None:
+                raise Exception("Get Encoder Fail, neither encoder setup nor json file")
+            return self.json_helper.get_encoder(self.col_name)
+            
 
     ##################### below is for categotical computation ##################
 
@@ -123,7 +139,7 @@ class DataProcessor:
             df[self.col_name] = df[self.col_name].astype(
                     pd.api.types.CategoricalDtype(categories, ordered=True)
                 )
-        df = df.categorize(columns = [self.col_name])
+        # df = df.categorize(columns = [self.col_name])
 
     def get_categories(self, df) -> list[str]:
         return df[self.col_name].categories
@@ -133,8 +149,6 @@ class DataProcessor:
         judge whether this column is categorical
         """
         return self.is_category or self.d_type == "str" or self.d_type == 'object'
-
-
 
     ##################### below is for statisics ##################
 

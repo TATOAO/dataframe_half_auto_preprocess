@@ -37,9 +37,9 @@ class DataProcessorRegister:
     sample_ratio: float = 0.01
     sample_df:Optional[DataFrame] = None
     random_seed: int = 28938
-    file_name: str = './pre_encoder.json'
     transformer_dict: dict[str, Union[MinMaxScalerJson, OrdinalEncoderJson]] = {}
-    json_helper: JsonSaverHelper = JsonSaverHelper()
+    file_name: str = './pre_encoder.json'
+    json_helper: JsonSaverHelper = JsonSaverHelper(json_file_path = file_name)
 
     def get_all_categorical_columns_name(self) -> list[str]:
         return [processor.col_name 
@@ -51,7 +51,10 @@ class DataProcessorRegister:
         """
         register the config class
         """
-        self.registed_processor_dict[processor.__name__] = processor()
+        self.registed_processor_dict[processor.__name__] = processor(
+                json_helper = self.json_helper,
+                file_name = self.file_name
+                )
 
     def prepare_compute(self):
         """
@@ -67,10 +70,11 @@ class DataProcessorRegister:
         for col_name, col_processor in self.registed_processor_dict.items():
             if self.sample_df is None:
                 raise ValueError("self.sample_df is None")
+            # col_processor.preprocess(self.sample_df)
             col_processor.run_with_statics(self.sample_df)
             # to fit category, the sample df must first be computed 
 
-        self.sample_df.compute()
+        self.sample_df = self.sample_df.compute()
         for col_name, col_processor in self.registed_processor_dict.items():
             col_processor.fit_transform(self.sample_df)
 
@@ -83,13 +87,19 @@ class DataProcessorRegister:
             self.json_helper.add_model(col_name, col_processor.get_encoder())
             self.json_helper.write_to_json(self.file_name)
 
-    def compute(self):
-        result = self.registed_df.compute()
-        return result
+    def process(self):
+        for col_name, col_processor in self.registed_processor_dict.items():
+            if self.registed_df is not None:
+                col_processor.run(self.registed_df)
+                col_processor.get_encoder()
+                col_processor.run_transform(self.registed_df)
+
+        return self.registed_df
 
     def sample_compute(self):
         if self.sample_df is None:
             raise ValueError("self.sample_df is None")
+
         return self.sample_df.compute()
 
 

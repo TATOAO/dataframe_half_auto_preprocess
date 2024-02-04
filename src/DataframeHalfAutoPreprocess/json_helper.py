@@ -6,6 +6,10 @@ __all___ = "json_saver"
 
 class JsonSaverHelper:
     model_map: Dict[str,Union[MinMaxScalerJson, OrdinalEncoderJson]] = {}
+    json_file_path: str
+
+    def __init__(self, json_file_path: str):
+        self.json_file_path = json_file_path
 
     def add_model(self, col_name:str, model:Union[MinMaxScalerJson, OrdinalEncoderJson]):
         self.model_map[col_name] = model
@@ -17,6 +21,11 @@ class JsonSaverHelper:
         f = open(json_file, 'w')
         json.dump(self.model_map, fp=f, cls= MyEncoder, indent=4)
         f.close()
+
+    def get_encoder(self, encoder_name: str) -> Union[MinMaxScalerJson, OrdinalEncoderJson]:
+        if len(self.model_map) == 0:
+            self.load_transformer_from_file(self.json_file_path)
+        return self.model_map[encoder_name]
 
     def load_transformer_from_file(self, load_path:str = ""):
         file = open(load_path, 'r')
@@ -40,6 +49,4 @@ class JsonSaverHelper:
             else:
                 raise Exception("Now only support MinMaxScaler and OrdinalEncoder")
 
-
-            
 # json_saver = JsonSaverHelper()

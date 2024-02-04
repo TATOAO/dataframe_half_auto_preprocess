@@ -13,11 +13,10 @@ df = dd.read_csv(sample_csv, blocksize=1e2)
 dhap.register.set_dataframe(df)
 # dhap.register.set_pre_encoder_load_file('./pre_encoder.json')
 dhap.register.prepare_compute()
-dhap.register.sample_compute()
-
 dhap.register.save_model()
 
-
+# 
+dhap.register.process()
 # dhap.register.load_transformer_from_file('./pre_encoder.json')
 # dhap.register.unseen_preprocess()
 
