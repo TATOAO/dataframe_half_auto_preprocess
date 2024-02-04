@@ -24,11 +24,15 @@ class OrdinalEncoderJson(OrdinalEncoder):
             raise Exception(error_message)
         self.column_name = encoder_id
 
+
+    def get_categories(self) -> list:
+        return self.dtypes_[self.column_name].categories.tolist()
+
     def __to_json__(self) -> dict:
         return {
                     "encoder_id": self.column_name,
                     "encoder_type": "OrdinalEncoder",
-                    "classes": self.dtypes_[self.column_name].categories.tolist()
+                    "classes": self.get_categories()
                 }
 
     @classmethod

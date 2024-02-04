@@ -46,7 +46,7 @@ class DataProcessor:
         for required in ('col_name', 'd_type'):
             if getattr(cls, required) == "":
                 raise TypeError(f"Can't instantiate abstract class {cls.__name__} without {required} attribute defined")
-        
+                col_processor.get_encoder()
         return super().__init_subclass__(**kwargs)
 
     ##################### main methods below #################################
@@ -61,21 +61,23 @@ class DataProcessor:
         df[self.col_name] = df[self.col_name].astype(self.d_type)
 
         if self.judge_is_category():
+            if self.encoder is not None:
+                pass
             self.categorical_preprocess(df, categories)
 
-
-    def init_transform(self):
-        """
-        must run after set the json file
-        """
-        pass
-
     def prepare_run_transform(self, df: DataFrame) -> None:
+        """
+        Lacily run encoder transfrom process
+        """
         encoder = self.get_encoder()
         df[self.col_name] = encoder.transform(df[[self.col_name]])[self.col_name]
 
     def fit_transform(self, sample_df: DataFrame) -> \
                 Union[OrdinalEncoderJson, MinMaxScalerJson]:
+        """
+        Fit the encoder actively
+        return the fitted encoder
+        """
 
         if self.judge_is_category():
             lbe = OrdinalEncoderJson(encoder_id = self.col_name)
@@ -90,20 +92,15 @@ class DataProcessor:
 
     def statistic(self, sample_df: DataFrame):
         """
-        mission value ratio
-        distribution
-        need to be sub 
+        calculate the statistic including and output:
+        1. mission value ratio
+        2. distribution
         """
         if self.judge_is_category():
-
             counting_result = sample_df.groupby(self.col_name).count().compute()
             print(counting_result)
 
-
-    def run(self, df:DataFrame) -> None:
-        self.preprocess(df)
-
-    def run_with_statics(self, sample_df:DataFrame) -> None:
+    def preprocess_with_statics(self, sample_df:DataFrame) -> None:
         """
         all runing should be lazy
         1. do the statistic
@@ -117,22 +114,31 @@ class DataProcessor:
         self.preprocess(sample_df)
         self.statistic(sample_df)
 
-    def get_encoder(self) -> Union[OrdinalEncoderJson, MinMaxScalerJson]:
+    def get_encoder(self) -> Union[OrdinalEncoderJson, MinMaxScalerJson, None]:
         if self.encoder is not None:
             return self.encoder
         else:
             # try to load from json file
             if self.file_name is None:
-                raise Exception("Get Encoder Fail, neither encoder setup nor json file")
+                # raise Exception("Get Encoder Fail, neither encoder setup nor json file")
+                return None
             return self.json_helper.get_encoder(self.col_name)
-            
+        
 
     ##################### below is for categotical computation ##################
+
+
+    def categorical_load_process(self, df):
+        encoder: OrdinalEncoderJson = self.get_encoder()
+        categories = encoder.get_categories()
+        df[self.col_name] = df[self.col_name].astype(
+                pd.api.types.CategoricalDtype(categories, ordered=True))
 
     def categorical_preprocess(self, df: DataFrame, categories: list[str]) -> None:
         """
         should run lazily
         """
+
         if len(categories) == 0:
             df[self.col_name] = df[self.col_name].astype('category')
         else:
@@ -140,9 +146,6 @@ class DataProcessor:
                     pd.api.types.CategoricalDtype(categories, ordered=True)
                 )
         # df = df.categorize(columns = [self.col_name])
-
-    def get_categories(self, df) -> list[str]:
-        return df[self.col_name].categories
 
     def judge_is_category(self):
         """

@@ -33,10 +33,13 @@ class DataProcessorRegister:
     registed_df:Optional[DataFrame] = None
     scalers_json: str = ""
     labelencoders_json: str = ""
+    ## sample 
     sample_nrows: int = 100_000
     sample_ratio: float = 0.01
     sample_df:Optional[DataFrame] = None
     random_seed: int = 28938
+
+    ## 
     transformer_dict: dict[str, Union[MinMaxScalerJson, OrdinalEncoderJson]] = {}
     file_name: str = './pre_encoder.json'
     json_helper: JsonSaverHelper = JsonSaverHelper(json_file_path = file_name)
@@ -67,17 +70,16 @@ class DataProcessorRegister:
         if self.sample_df is None:
             self.set_sample_dataframe()
 
+        # process sample df and do statistic
         for col_name, col_processor in self.registed_processor_dict.items():
             if self.sample_df is None:
                 raise ValueError("self.sample_df is None")
-            # col_processor.preprocess(self.sample_df)
-            col_processor.run_with_statics(self.sample_df)
-            # to fit category, the sample df must first be computed 
+            col_processor.preprocess_with_statics(self.sample_df)
 
+        # to fit category, the sample df must first be computed 
         self.sample_df = self.sample_df.compute()
         for col_name, col_processor in self.registed_processor_dict.items():
             col_processor.fit_transform(self.sample_df)
-
 
     def save_model(self):
         """
@@ -90,9 +92,14 @@ class DataProcessorRegister:
     def process(self):
         for col_name, col_processor in self.registed_processor_dict.items():
             if self.registed_df is not None:
-                col_processor.run(self.registed_df)
-                col_processor.get_encoder()
-                col_processor.run_transform(self.registed_df)
+                categories_loaded = []
+                if col_processor.judge_is_category():
+                    encoder = col_processor.get_encoder()
+                    if encoder is not None and isinstance(encoder, OrdinalEncoderJson):
+                        categories_loaded = encoder.get_categories()
+
+                col_processor.preprocess(self.registed_df, categories_loaded)
+                col_processor.prepare_run_transform(self.registed_df)
 
         return self.registed_df
 
