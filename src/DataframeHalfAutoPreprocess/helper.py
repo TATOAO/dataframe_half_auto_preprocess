@@ -44,8 +44,15 @@ class OrdinalEncoderJson(OrdinalEncoder):
             raise(Exception(error_message))
 
         new_obj = cls(encoder_id = input_dict['encoder_id'])
-        new_obj.fit(np.array(input_dict['classes']).reshape(-1,1))
+        column_name = input_dict['encoder_id']
+        # new_obj.fit(np.array(input_dict['classes']).reshape(-1,1))
+        fake_df = pd.DataFrame({column_name: input_dict['classes']})
+        fake_df[column_name] = fake_df[column_name].astype('category')
+        new_obj.fit(fake_df)
         return new_obj
+
+    def __repr__(self):
+        return str(self.__dict__)
 
 class LabelEncoderJson(LabelEncoder):
     encdoer_id:str = "unset"

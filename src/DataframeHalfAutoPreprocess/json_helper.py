@@ -14,6 +14,9 @@ class JsonSaverHelper:
     def add_model(self, col_name:str, model:Union[MinMaxScalerJson, OrdinalEncoderJson]):
         self.model_map[col_name] = model
 
+    def set_json_file_path(self, path:str):
+        self.json_file_path = path
+
     def write_to_json(self, json_file: str) -> None:
         """
         save the whole model configs into json
@@ -35,7 +38,7 @@ class JsonSaverHelper:
 
     def load_transformer_from_list(self, config_list:list[dict]) -> None:
 
-        for config_dict in config_list:
+        for config_dict in config_list.values():
             if 'encoder_type' not in config_dict:
                 raise Exception("The source json file has no encoder_type")
             
@@ -44,8 +47,10 @@ class JsonSaverHelper:
                 self.model_map[col_name] = MinMaxScalerJson.\
                                         load_from_dict(config_dict)
             elif config_dict['encoder_type'] == "OrdinalEncoder":
+
                 self.model_map[col_name] = OrdinalEncoderJson.\
                                         load_from_dict(config_dict)
+
             else:
                 raise Exception("Now only support MinMaxScaler and OrdinalEncoder")
 

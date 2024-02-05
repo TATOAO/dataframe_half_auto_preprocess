@@ -12,7 +12,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "DataframeHalfAutoPreprocess"
-version = "1.0.2"
+version = "1.0.3"
 authors = [
   { name="TATOAO", email="TATOAO@126.com" },
 ]

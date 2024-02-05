@@ -89,19 +89,19 @@ class DataProcessorRegister:
             self.json_helper.add_model(col_name, col_processor.get_encoder())
             self.json_helper.write_to_json(self.file_name)
 
-    def process(self):
-        for col_name, col_processor in self.registed_processor_dict.items():
-            if self.registed_df is not None:
+    def process(self, target_df: DataFrame):
+        for _, col_processor in self.registed_processor_dict.items():
+            if target_df is not None:
                 categories_loaded = []
                 if col_processor.judge_is_category():
                     encoder = col_processor.get_encoder()
                     if encoder is not None and isinstance(encoder, OrdinalEncoderJson):
                         categories_loaded = encoder.get_categories()
 
-                col_processor.preprocess(self.registed_df, categories_loaded)
-                col_processor.prepare_run_transform(self.registed_df)
+                col_processor.preprocess(target_df, categories_loaded)
+                col_processor.prepare_run_transform(target_df)
 
-        return self.registed_df
+        return target_df
 
     def sample_compute(self):
         if self.sample_df is None:
@@ -137,6 +137,7 @@ class DataProcessorRegister:
             
     def set_pre_encoder_load_file(self, file_name:str = './pre_encoder.json') -> None:
         self.loaded_json_path = file_name
+        self.json_helper.set_json_file_path(file_name)
 
     def get_sample_df(self, use_cache:bool = False) -> Optional[DataFrame]:
         if use_cache:
@@ -162,10 +163,6 @@ class DataProcessorRegister:
         for col_processor in self.registed_processor_dict.values():
             result.append(col_processor.col_name)
         return result
-
-    def unseen_preprocess(self):
-        for col_name, transformer in self.transformer_dict.items():
-            self.registed_df[col_name] = transformer.transform(self.registed_df[[col_name]])
 
 
 

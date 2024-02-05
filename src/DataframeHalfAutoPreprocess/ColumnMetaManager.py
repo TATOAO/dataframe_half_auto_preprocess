@@ -57,7 +57,6 @@ class ColumnMeta(BaseModel):
 def main():
 
     bb = LabelEncoderJson()
-    import ipdb;ipdb.set_trace()
     records = {"a": bb}
     file = open('a.json', 'w')
     # json.dump(records, file)
