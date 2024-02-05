@@ -22,7 +22,7 @@ class JsonSaverHelper:
         save the whole model configs into json
         """
         f = open(json_file, 'w')
-        json.dump(self.model_map, fp=f, cls= MyEncoder, indent=4)
+        json.dump(self.model_map, fp=f, cls= MyEncoder, indent=4, ensure_ascii=False)
         f.close()
 
     def get_encoder(self, encoder_name: str) -> Union[MinMaxScalerJson, OrdinalEncoderJson]:

@@ -19,6 +19,7 @@ def example1():
     dhap.register.set_dataframe(df)
     dhap.register.set_pre_encoder_load_file('./pre_encoder.json')
     dhap.register.prepare_compute()
+    dhap.register.save_model()
     processed_df = dhap.register.process(real_df)
 
 
@@ -36,7 +37,7 @@ def example3():
     print(processed_df.head())
 
 def main():
-    example3()
+    example1()
     
 if __name__ == "__main__":
     main()

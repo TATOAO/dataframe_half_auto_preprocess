@@ -1,0 +1,41 @@
+{
+    "col_A": {
+        "encoder_id": "A",
+        "encoder_type": "OrdinalEncoder",
+        "classes": [
+            "1",
+            "2",
+            "3",
+            "5"
+        ]
+    },
+    "col_E": {
+        "encoder_id": "E",
+        "encoder_type": "OrdinalEncoder",
+        "classes": [
+            "D",
+            "B",
+            "A",
+            "C"
+        ]
+    },
+    "col_B": {
+        "encoder_id": "B",
+        "encoder_type": "MinMaxScaler",
+        "scale": [
+            0.012987012987012988
+        ],
+        "min": [
+            -0.06493506493506494
+        ],
+        "data_min": [
+            5
+        ],
+        "data_max": [
+            82
+        ],
+        "data_range": [
+            77
+        ]
+    }
+}
