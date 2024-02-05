@@ -2,7 +2,15 @@ from json import JSONEncoder
 # from sklearn.preprocessing import LabelEncoder, OrdinalEncoder
 from dask_ml.preprocessing import MinMaxScaler, OrdinalEncoder, LabelEncoder
 import numpy as np
-from typing import Self, Optional
+from typing import Optional
+import sys
+
+# to adapt newer version of python
+if sys.version_info >= (3, 11):
+    from typing import Self
+else:
+    from typing_extensions import Self
+
 import json
 import pandas as pd
 
