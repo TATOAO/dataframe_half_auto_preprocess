@@ -121,7 +121,7 @@ class DataProcessorRegister:
         self.sample_df = self.get_sample_df()
 
     def set_sample_params(self, sample_nrows:Optional[int] = None, 
-                                sample_ratio: Optional[int] = None) -> None:
+                                sample_ratio: Optional[float] = None) -> None:
         """
         Config the sample dataframe
         """
@@ -133,7 +133,7 @@ class DataProcessorRegister:
             self.sample_ratio = self.sample_nrows / len(self.registed_df)
 
         if sample_ratio is not None:
-            self.sample_nrows = sample_ratio
+            self.sample_ratio = sample_ratio
             
     def set_pre_encoder_load_file(self, file_name:str = './pre_encoder.json') -> None:
         self.loaded_json_path = file_name

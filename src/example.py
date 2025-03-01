@@ -22,7 +22,6 @@ def example1():
     dhap.register.save_model()
     processed_df = dhap.register.process(real_df)
 
-
 ####### example 2 don't load directly run
 def example2():
     dhap.register.set_dataframe(df)
@@ -38,7 +37,6 @@ def example3():
 
 def main():
     example1()
-    
+
 if __name__ == "__main__":
     main()
-

@@ -1,21 +1,19 @@
 [build-system]
 requires = [
-	"hatchling>=1.21.0",
-	"setuptools>=61.0",
-	"plotext>=5.2.8",
-	"pandas",
-	"scikit-learn",
-	"dask",
-	"dask-ml"
-	]
+    "hatchling>=1.21.0",
+    "setuptools>=61.0",
+    "plotext>=5.2.8",
+    "pandas",
+    "scikit-learn",
+    "dask",
+    "dask-ml",
+]
 build-backend = "hatchling.build"
 
 [project]
 name = "DataframeHalfAutoPreprocess"
-version = "1.0.3"
-authors = [
-  { name="TATOAO", email="TATOAO@126.com" },
-]
+version = "1.0.4"
+authors = [{ name = "TATOAO", email = "TATOAO@126.com" }]
 description = "A simple framework for Dataframe (Dask & Pandas dataframe) data processing tool"
 readme = "README.md"
 requires-python = ">=3.8"
